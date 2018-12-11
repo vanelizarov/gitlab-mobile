@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
+import 'token.dart';
+import 'api.dart';
+
 class AuthPage extends StatefulWidget {
   @override
   _AuthPageState createState() => _AuthPageState();
@@ -8,14 +11,36 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   String _token = '';
+  TextEditingController _textController =
+      TextEditingController(text: 'bg3GzUXMpcvA3tVouy75');
 
   get _isTokenValid => _token.trim() != '';
 
-  _onTokenTextFieldValueChanged(String token) {
-    setState(() => _token = token);
+  _onTokenTextFieldValueChanged() {
+    setState(() => _token = _textController.text);
   }
 
-  _onContinue() {}
+  _onContinue() {
+    Token().value = _token;
+
+    Api().getProjects().then((projects) {
+      projects.forEach((project) {
+        print(project);
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_onTokenTextFieldValueChanged);
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +62,8 @@ class _AuthPageState extends State<AuthPage> {
           children: <Widget>[
             Container(
               child: CupertinoTextField(
+                controller: _textController,
+                autofocus: true,
                 autocorrect: false,
                 cursorColor: ui.Colors.blue,
                 cursorWidth: 1.0,
@@ -49,7 +76,6 @@ class _AuthPageState extends State<AuthPage> {
                   color: ui.Colors.white,
                   borderRadius: BorderRadius.circular(5.0),
                 ),
-                onChanged: _onTokenTextFieldValueChanged,
               ),
               margin: const EdgeInsets.only(bottom: 10.0),
             ),
@@ -74,11 +100,7 @@ class _AuthPageState extends State<AuthPage> {
                 child: ui.ButtonText(
                   text: 'Continue',
                 ),
-                onPressed: _isTokenValid
-                    ? () {
-                        print(_token);
-                      }
-                    : null,
+                onPressed: _isTokenValid ? _onContinue : null,
               ),
             ),
           ],
