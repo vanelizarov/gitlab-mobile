@@ -84,6 +84,6 @@ class Project {
 
   @override
   String toString() {
-    return 'Project[ id=$id, description=$description, defaultBranch=$defaultBranch, sshUrlToRepo=$sshUrlToRepo, httpUrlToRepo=$httpUrlToRepo, webUrl=$webUrl, readmeUrl=$readmeUrl, tagList=$tagList, name=$name, nameWithNamespace=$nameWithNamespace, path=$path, pathWithNamespace=$pathWithNamespace, createdAt=$createdAt, lastActivityAt=$lastActivityAt, forksCount=$forksCount, avatarUrl=$avatarUrl, starCount=$starCount,]';
+    return 'Project[ id=$id, description=$description, defaultBranch=$defaultBranch, sshUrlToRepo=$sshUrlToRepo, httpUrlToRepo=$httpUrlToRepo, webUrl=$webUrl, readmeUrl=$readmeUrl, tagList=$tagList, name=$name, nameWithNamespace=$nameWithNamespace, path=$path, pathWithNamespace=$pathWithNamespace, createdAt=$createdAt, lastActivityAt=$lastActivityAt, forksCount=$forksCount, avatarUrl=$avatarUrl, starCount=$starCount ]';
   }
 }

@@ -7,9 +7,6 @@ class Colors {
   /// Цвет акцентов
   static const Color blue = Color(0xff1f78d1);
 
-  /// Цвет акцентов при нажатии
-  // static const Color darkBlue = Color(0xff134a81);
-
   /// Цвет основного текста
   static const Color deepBlue = Color(0xff001424);
 
@@ -30,4 +27,7 @@ class Colors {
 
   /// Цвет разделителей
   static const Color linkWater = Color(0xffe2e5eb);
+
+  /// Цвет ошибок
+  static const Color red = Color(0xffdb3b21);
 }

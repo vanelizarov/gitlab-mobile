@@ -1,49 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
-import 'token.dart';
-import 'api.dart';
+import 'auth_bloc.dart';
+import 'bloc_provider.dart';
 
-class AuthPage extends StatefulWidget {
-  @override
-  _AuthPageState createState() => _AuthPageState();
-}
+import 'models/error.dart';
+import 'models/user.dart';
 
-class _AuthPageState extends State<AuthPage> {
-  String _token = '';
-  TextEditingController _textController =
-      TextEditingController(text: 'bg3GzUXMpcvA3tVouy75');
+import 'projects.dart';
 
-  get _isTokenValid => _token.trim() != '';
+// bg3GzUXMpcvA3tVouy75
 
-  _onTokenTextFieldValueChanged() {
-    setState(() => _token = _textController.text);
-  }
-
-  _onContinue() {
-    Token().value = _token;
-
-    Api().getProjects().then((projects) {
-      projects.forEach((project) {
-        print(project);
-      });
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _textController.addListener(_onTokenTextFieldValueChanged);
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
+class AuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final AuthBloc bloc = BlocProvider.of<AuthBloc>(context);
+    final FocusNode focusNode = FocusNode();
+
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         backgroundColor: ui.Colors.purple,
@@ -61,23 +34,33 @@ class _AuthPageState extends State<AuthPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              child: CupertinoTextField(
-                controller: _textController,
+              child: ui.TextField(
                 autofocus: true,
-                autocorrect: false,
-                cursorColor: ui.Colors.blue,
-                cursorWidth: 1.0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
-                  vertical: 15.0,
-                ),
                 placeholder: 'Personal access token',
-                decoration: BoxDecoration(
-                  color: ui.Colors.white,
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
+                text: 'bg3GzUXMpcvA3tVouy75',
+                onChanged: (String token) => bloc.setToken.add(token),
+                focusNode: focusNode,
+                disabledStream: bloc.authInProgress,
               ),
               margin: const EdgeInsets.only(bottom: 10.0),
+            ),
+            StreamBuilder(
+              stream: bloc.error,
+              initialData: null,
+              builder: (_, AsyncSnapshot<ApiError> snapshot) {
+                if (snapshot.hasData) {
+                  return Container(
+                    child: Text(
+                      'Error: ${snapshot.data.message}',
+                      style: TextStyle(fontSize: 12.0, color: ui.Colors.red),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    margin: const EdgeInsets.only(bottom: 10.0),
+                  );
+                }
+
+                return Container();
+              },
             ),
             Container(
               child: Text(
@@ -93,14 +76,42 @@ class _AuthPageState extends State<AuthPage> {
                   color: ui.Colors.greyChateau,
                 ),
               ),
-              padding: const EdgeInsets.only(left: 5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
             ),
             Container(
-              child: ui.Button(
-                child: ui.ButtonText(
-                  text: 'Continue',
-                ),
-                onPressed: _isTokenValid ? _onContinue : null,
+              child: StreamBuilder(
+                stream: bloc.authInProgress,
+                initialData: false,
+                builder: (_, AsyncSnapshot<bool> snapshot) {
+                  if (snapshot.data) {
+                    return ui.Button(
+                      child: CupertinoActivityIndicator(
+                        animating: true,
+                      ),
+                      onPressed: null,
+                    );
+                  }
+
+                  return StreamBuilder(
+                    stream: bloc.tokenIsValid,
+                    builder: (_, AsyncSnapshot<bool> snapshot) {
+                      if (snapshot.data != false) {
+                        return ui.Button(
+                          child: ui.ButtonText(text: 'Continue'),
+                          onPressed: () {
+                            focusNode.unfocus();
+                            bloc.signIn.add(null);
+                          },
+                        );
+                      }
+
+                      return ui.Button(
+                        child: ui.ButtonText(text: 'Continue'),
+                        onPressed: null,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
