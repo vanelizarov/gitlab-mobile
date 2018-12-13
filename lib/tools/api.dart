@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'storage.dart';
+import 'package:torg_gitlab/tools/storage.dart';
 
-import 'models/project.dart';
-import 'models/user.dart';
-import 'models/error.dart';
+import 'package:torg_gitlab/models/project.dart';
+import 'package:torg_gitlab/models/user.dart';
+import 'package:torg_gitlab/models/error.dart';
 
 const String kApiPrefix = 'torgteam.cf';
 

@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
-import 'auth_bloc.dart';
-import 'bloc_provider.dart';
+import 'package:torg_gitlab/tools/storage.dart';
+import 'package:torg_gitlab/tools/bloc_provider.dart';
+
+import 'package:torg_gitlab/blocs/auth_bloc.dart';
 
 import 'root.dart';
-import 'storage.dart';
 
 void main() => runApp(App());
 
