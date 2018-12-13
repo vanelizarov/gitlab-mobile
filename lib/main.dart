@@ -1,12 +1,67 @@
 import 'package:flutter/cupertino.dart';
+import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+
+import 'auth_bloc.dart';
+import 'bloc_provider.dart';
+
+import 'root.dart';
+import 'storage.dart';
 
 void main() => runApp(App());
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    print('entering app state ${state.toString()}');
+
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.suspending:
+        await Storage().save();
+        break;
+      case AppLifecycleState.resumed:
+        await Storage().load();
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
-      home: Container(),
+      home: FutureBuilder(
+        future: Storage().load(),
+        builder: (_, AsyncSnapshot<void> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.active:
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return Container(color: ui.Colors.whiteSmoke);
+            default:
+              return BlocProvider<AuthBloc>(
+                bloc: AuthBloc(),
+                child: RootPage(),
+              );
+          }
+        },
+      ),
     );
   }
 }

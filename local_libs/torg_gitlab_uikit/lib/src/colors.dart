@@ -1,9 +1,33 @@
 import 'dart:ui' show Color;
 
 class Colors {
-  /// Основной гитлабовский цвет
+  /// Цвет гитлаба
   static const Color purple = Color(0xff292961);
 
-  /// Белый
+  /// Цвет акцентов
+  static const Color blue = Color(0xff1f78d1);
+
+  /// Цвет основного текста
+  static const Color deepBlue = Color(0xff001424);
+
+  /// Цвет дополнительного текста
+  static const Color greyRaven = Color(0xff6e7782);
+
+  /// Цвет плейсхолдеров и неактивных элементов
+  static const Color greyChateau = Color(0xff9198a0);
+
+  /// Цвет неактивных кнопок
+  static const Color greyHeather = Color(0xffbbc1c7);
+
+  /// Цвет фона приложений
+  static const Color whiteSmoke = Color(0xfff2f3f7);
+
+  /// Цвет подложки основного контента
   static const Color white = Color(0xffffffff);
+
+  /// Цвет разделителей
+  static const Color linkWater = Color(0xffe2e5eb);
+
+  /// Цвет ошибок
+  static const Color red = Color(0xffdb3b21);
 }

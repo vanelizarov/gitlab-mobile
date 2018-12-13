@@ -12,6 +12,9 @@ dependencies:
   cupertino_icons: ^0.1.2
   torg_gitlab_uikit:
     path: local_libs/torg_gitlab_uikit
+  http: ^0.12.0
+  # rxdart: ^0.19.0
+  shared_preferences: ^0.4.3
 
 dev_dependencies:
   flutter_test:
