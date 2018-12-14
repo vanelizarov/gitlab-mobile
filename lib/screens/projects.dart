@@ -16,35 +16,27 @@ class ProjectsPage extends StatelessWidget {
         color: ui.Colors.white,
         child: Row(
           children: <Widget>[
-            Hero(
-              tag: '${project.id}_image',
-              child: Container(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: Image.network(
-                    // TODO: refactor to inject private token automatically
-                    '${project.avatarUrl}?private_token=${_api.token}', //'http://y.delfi.lv/norm/1370/37505_dGxjiR.jpeg',
-                    fit: BoxFit.cover,
-                  ),
+            Container(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  // TODO: refactor to inject private token automatically
+                  '${project.avatarUrl}?private_token=${_api.token}', //'http://y.delfi.lv/norm/1370/37505_dGxjiR.jpeg',
+                  fit: BoxFit.cover,
                 ),
-                margin: const EdgeInsets.only(right: 15.0),
-                width: 40.0,
-                height: 40.0,
               ),
-              transitionOnUserGestures: true,
+              margin: const EdgeInsets.only(right: 15.0),
+              width: 40.0,
+              height: 40.0,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  child: Hero(
-                    tag: '${project.id}_name',
-                    child: Text(
-                      project.nameWithNamespace,
-                      style: TextStyle(color: ui.Colors.deepBlue),
-                    ),
-                    transitionOnUserGestures: true,
+                  child: Text(
+                    project.nameWithNamespace,
+                    style: TextStyle(color: ui.Colors.deepBlue),
                   ),
                   margin: const EdgeInsets.only(bottom: 5.0),
                 ),

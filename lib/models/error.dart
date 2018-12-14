@@ -8,5 +8,5 @@ class ApiError {
   }
 
   @override
-  String toString() => 'Error[ message=$message ]';
+  String toString() => 'ApiError[ message=$message ]';
 }
