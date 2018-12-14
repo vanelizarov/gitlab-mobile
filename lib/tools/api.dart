@@ -1,12 +1,12 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'storage.dart';
+import 'package:torg_gitlab/tools/storage.dart';
 
-import 'models/project.dart';
-import 'models/user.dart';
-import 'models/error.dart';
+import 'package:torg_gitlab/models/project.dart';
+import 'package:torg_gitlab/models/user.dart';
+import 'package:torg_gitlab/models/error.dart';
+import 'package:torg_gitlab/models/branch.dart';
 
 const String kApiPrefix = 'torgteam.cf';
 
@@ -49,9 +49,6 @@ class Api {
       return rawProjects.map<Project>((raw) => Project.fromJson(raw)).toList();
     }
 
-    // throw Exception('Failed to fetch projects: '
-    //     'status: ${res.statusCode} '
-    //     'res: ${_decodeResponse(res)}');
     throw ApiError.fromJson(_decodeResponse(res));
   }
 
@@ -63,9 +60,19 @@ class Api {
       return User.fromJson(_decodeResponse(res));
     }
 
-    // throw Exception('Failed to fetch user: '
-    //     'status: ${res.statusCode} '
-    //     'res: ${_decodeResponse(res)}');
+    throw ApiError.fromJson(_decodeResponse(res));
+  }
+
+  Future<List<Branch>> getBranchesForProject(int projectId) async {
+    final String uri = _buildUri('/projects/$projectId/repository/branches');
+    final http.Response res = await http.get(uri);
+
+    if (res.statusCode == 200) {
+      final List<dynamic> rawBranches = _decodeResponse(res);
+
+      return rawBranches.map<Branch>((raw) => Branch.fromJson(raw)).toList();
+    }
+
     throw ApiError.fromJson(_decodeResponse(res));
   }
 }

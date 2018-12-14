@@ -9,13 +9,12 @@ final Tween<double> _kOpacityChangeTween = Tween<double>(begin: 1.0, end: 0.75);
 class Button extends StatefulWidget {
   final Widget child;
   final VoidCallback onPressed;
+  final Color color;
+  final BoxBorder border;
 
   get isDisabled => onPressed == null;
 
-  Button({
-    @required this.child,
-    @required this.onPressed,
-  });
+  Button({@required this.child, @required this.onPressed, this.color, this.border});
 
   @override
   State<StatefulWidget> createState() => _ButtonState();
@@ -56,8 +55,7 @@ class _ButtonState extends State<Button> with SingleTickerProviderStateMixin {
     final bool wasHeldDown = _heldDown;
     final TickerFuture ticker = _heldDown
         ? _animationController.animateTo(1.0, duration: _kOpacityChangeDuration)
-        : _animationController.animateTo(0.0,
-            duration: _kOpacityChangeDuration);
+        : _animationController.animateTo(0.0, duration: _kOpacityChangeDuration);
 
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _heldDown) {
@@ -91,6 +89,8 @@ class _ButtonState extends State<Button> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final bool isEnabled = !widget.isDisabled;
+    final Color color = widget.color != null ? widget.color : Colors.blue;
+    final Border border = widget.border != null ? widget.border : null;
 
     return GestureDetector(
       onTap: widget.onPressed,
@@ -107,7 +107,8 @@ class _ButtonState extends State<Button> with SingleTickerProviderStateMixin {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5.0),
-              color: widget.isDisabled ? Colors.greyHeather : Colors.blue,
+              color: widget.isDisabled ? Colors.greyHeather : color,
+              border: widget.isDisabled ? null : border,
             ),
             child: Center(
               child: widget.child,

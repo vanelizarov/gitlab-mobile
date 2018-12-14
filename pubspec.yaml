@@ -22,3 +22,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: false
+
+  fonts:
+    - family: TorgGitlabIcons
+      fonts:
+        - asset: assets/fonts/TorgGitlabIcons.ttf

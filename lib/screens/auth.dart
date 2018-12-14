@@ -1,14 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
-import 'auth_bloc.dart';
-import 'bloc_provider.dart';
+import 'package:torg_gitlab/blocs/auth_bloc.dart';
+import 'package:torg_gitlab/tools/bloc_provider.dart';
 
-import 'models/error.dart';
-import 'models/user.dart';
-
-import 'projects.dart';
-
+import 'package:torg_gitlab/models/error.dart';
 // bg3GzUXMpcvA3tVouy75
 
 class AuthPage extends StatelessWidget {
