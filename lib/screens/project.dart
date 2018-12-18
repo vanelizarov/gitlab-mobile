@@ -4,6 +4,8 @@ import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 import 'package:torg_gitlab/tools/icons.dart';
 import 'package:torg_gitlab/models/project.dart';
 
+import 'package:torg_gitlab/tools/bloc_provider.dart';
+import 'package:torg_gitlab/blocs/repository_bloc.dart';
 import 'repository.dart';
 
 class ProjectPage extends StatelessWidget {
@@ -31,6 +33,13 @@ class ProjectPage extends StatelessWidget {
         tabBar: CupertinoTabBar(
           activeColor: ui.Colors.purple,
           inactiveColor: ui.Colors.greyChateau,
+          backgroundColor: ui.Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: ui.Colors.linkWater,
+              width: 0.0,
+            ),
+          ),
           items: [
             BottomNavigationBarItem(
               title: Text('Repository'),
@@ -50,7 +59,10 @@ class ProjectPage extends StatelessWidget {
         ),
         tabBuilder: (_, int index) {
           if (index == 0) {
-            return RepositoryView(project: _project);
+            return BlocProvider<RepositoryBloc>(
+              bloc: RepositoryBloc(),
+              child: RepositoryView(project: _project),
+            );
           } else {
             return Container(
               child: Text('Not implemented yet'),

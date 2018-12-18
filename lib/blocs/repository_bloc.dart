@@ -29,6 +29,7 @@ class RepositoryBloc implements BlocBase {
 
   StreamController<String> _branchController = StreamController<String>.broadcast();
   StreamSink<String> get setBranch => _branchController.sink;
+  Stream<String> get branch => _branchController.stream;
 
   StreamController<ApiError> _errorController = StreamController<ApiError>.broadcast();
   Stream<ApiError> get error => _errorController.stream;
@@ -47,7 +48,6 @@ class RepositoryBloc implements BlocBase {
 
   void _onInit(RepositoryTreeRequest tree) {
     _currentRepoTree = tree;
-    _getRepoTree();
   }
 
   void _onPathChanged(String path) {
