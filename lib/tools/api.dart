@@ -7,6 +7,7 @@ import 'package:torg_gitlab/models/project.dart';
 import 'package:torg_gitlab/models/user.dart';
 import 'package:torg_gitlab/models/error.dart';
 import 'package:torg_gitlab/models/branch.dart';
+import 'package:torg_gitlab/models/tree_item.dart';
 
 const String kApiPrefix = 'torgteam.cf';
 
@@ -21,7 +22,7 @@ class Api {
   factory Api() => _instance;
   Api._();
 
-  String _buildUri(String path, [Map<String, String> queryParams]) {
+  String _buildUri(String path, {Map<String, String> queryParams}) {
     final Map<String, String> newQueryParams = Map<String, String>();
 
     if (queryParams != null) {
@@ -63,7 +64,7 @@ class Api {
     throw ApiError.fromJson(_decodeResponse(res));
   }
 
-  Future<List<Branch>> getBranchesForProject(int projectId) async {
+  Future<List<Branch>> getBranchesForProject({int projectId}) async {
     final String uri = _buildUri('/projects/$projectId/repository/branches');
     final http.Response res = await http.get(uri);
 
@@ -71,6 +72,34 @@ class Api {
       final List<dynamic> rawBranches = _decodeResponse(res);
 
       return rawBranches.map<Branch>((raw) => Branch.fromJson(raw)).toList();
+    }
+
+    throw ApiError.fromJson(_decodeResponse(res));
+  }
+
+  Future<List<TreeItem>> getRepositoryTree({
+    int projectId,
+    String path,
+    String branch,
+    int itemsPerPage = 20,
+    int page = 1,
+  }) async {
+    final String uri = _buildUri(
+      '/projects/$projectId/repository/tree',
+      queryParams: <String, String>{
+        'path': path,
+        'ref': branch,
+        'per_page': '$itemsPerPage',
+        'page': '$page'
+      },
+    );
+
+    final http.Response res = await http.get(uri);
+
+    if (res.statusCode == 200) {
+      final List<dynamic> rawTreeItems = _decodeResponse(res);
+
+      return rawTreeItems.map<TreeItem>((raw) => TreeItem.fromJson(raw)).toList();
     }
 
     throw ApiError.fromJson(_decodeResponse(res));

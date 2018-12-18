@@ -51,7 +51,6 @@ class AuthBloc implements BlocBase {
 
   Future<void> _onSignInActionReceived(dynamic _) async {
     _authInProgressController.sink.add(true);
-
     _errorController.sink.add(null);
 
     try {

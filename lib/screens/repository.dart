@@ -32,7 +32,7 @@ class _RepositoryViewState extends State<RepositoryView> {
   Future<void> _displayBranchPicker() async {
     setState(() => _isGettingBranches = true);
 
-    final List<Branch> branches = await _api.getBranchesForProject(widget._project.id);
+    final List<Branch> branches = await _api.getBranchesForProject(projectId: widget._project.id);
 
     setState(() => _isGettingBranches = false);
 
