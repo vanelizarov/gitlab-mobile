@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'api.dart';
-import 'bloc_provider.dart';
-import 'models/user.dart';
-import 'models/error.dart';
+import 'package:torg_gitlab/tools/api.dart';
+import 'package:torg_gitlab/tools/bloc_provider.dart';
+
+import 'package:torg_gitlab/models/user.dart';
+import 'package:torg_gitlab/models/error.dart';
 
 class AuthBloc implements BlocBase {
   final Api _api = Api();

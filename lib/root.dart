@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
-import 'api.dart';
+import 'package:torg_gitlab/tools/api.dart';
+import 'package:torg_gitlab/tools/bloc_provider.dart';
+import 'package:torg_gitlab/blocs/auth_bloc.dart';
 
-import 'auth_bloc.dart';
-import 'bloc_provider.dart';
+import 'package:torg_gitlab/models/user.dart';
 
-import 'models/user.dart';
-
-import 'auth.dart';
-import 'projects.dart';
+import 'package:torg_gitlab/screens/auth.dart';
+import 'package:torg_gitlab/screens/projects.dart';
 
 class RootPage extends StatelessWidget {
   @override
