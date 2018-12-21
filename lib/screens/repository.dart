@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
-import 'package:torg_gitlab/tools/api.dart';
+// import 'package:torg_gitlab/tools/api.dart';
 import 'package:torg_gitlab/tools/icons.dart';
 import 'package:torg_gitlab/tools/bloc_provider.dart';
 
@@ -13,12 +13,17 @@ import 'package:torg_gitlab/models/branch.dart';
 
 class RepositoryView extends StatelessWidget {
   final Project _project;
+  final List<TreeItem> _initialTree;
 
   // String _currentBranch = 'develop';
   // int _currentBranchIndex;
   // bool _isGettingBranches = false;
 
-  RepositoryView({Project project}) : _project = project;
+  RepositoryView({
+    Project project,
+    List<TreeItem> initialTree,
+  })  : _project = project,
+        _initialTree = initialTree;
 
   // Future<void> _displayBranchPicker() async {
   //   setState(() => _isGettingBranches = true);
@@ -73,8 +78,14 @@ class RepositoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Api api = Api();
+    // final Api api = Api();
     final RepositoryBloc bloc = BlocProvider.of<RepositoryBloc>(context);
+
+    bloc.init.add(RepositoryTreeRequest(
+      branch: _project.defaultBranch,
+      projectId: _project.id,
+      path: '',
+    ));
 
     final Widget loadingView = Container(
       color: ui.Colors.white,
@@ -133,102 +144,78 @@ class RepositoryView extends StatelessWidget {
               padding: const EdgeInsets.all(10.0),
             ),
           ),
-          FutureBuilder(
-            future: api.getRepositoryTree(
-              projectId: _project.id,
-              branch: _project.defaultBranch,
-              path: '',
-            ),
-            builder: (_, AsyncSnapshot<List<TreeItem>> snapshot) {
-              if (snapshot.hasData) {
-                bloc.init.add(
-                  new RepositoryTreeRequest(
-                    path: '',
-                    branch: _project.defaultBranch,
-                    projectId: _project.id,
-                  ),
-                );
+          StreamBuilder(
+            stream: bloc.tree,
+            initialData: _initialTree,
+            builder: (_, AsyncSnapshot<List<TreeItem>> treeSnapshot) {
+              return StreamBuilder(
+                stream: bloc.isTreeLoading,
+                builder: (_, AsyncSnapshot<bool> isTreeLoadingSnapshot) {
+                  if (isTreeLoadingSnapshot.data == true) {
+                    return sliverLoadingView;
+                  }
 
-                List<TreeItem> initialTree = snapshot.data;
+                  if (treeSnapshot.hasData) {
+                    final List<TreeItem> tree = treeSnapshot.data;
 
-                // return StreamBuilder(
-                //   stream: bloc.isTreeLoading,
-                //   initialData: false,
-                //   builder: (_, AsyncSnapshot<bool> snapshot) {
-                //     if (snapshot.data) {
-                //       return sliverLoadingView;
-                //     }
-                //   );
-                // },
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (_, int index) {
+                          final TreeItem blob = tree[index];
 
-                return StreamBuilder(
-                  stream: bloc.tree,
-                  initialData: initialTree,
-                  builder: (_, AsyncSnapshot<List<TreeItem>> snapshot) {
-                    if (snapshot.hasData) {
-                      final List<TreeItem> tree = snapshot.data;
-
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (_, int index) {
-                            final TreeItem blob = tree[index];
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                              child: GestureDetector(
-                                child: Container(
-                                  padding: const EdgeInsets.only(
-                                    top: 14.0,
-                                    bottom: 14.0,
-                                    left: 10.0,
-                                  ),
-                                  child: Row(
-                                    textBaseline: TextBaseline.alphabetic,
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                                    children: <Widget>[
-                                      Icon(
-                                        blob.type == TreeItemType.blob
-                                            ? TorgGitlabIcons.file
-                                            : TorgGitlabIcons.folder,
-                                        size: 16.0,
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.only(left: 5.0),
-                                        child: Text(
-                                          blob.name,
-                                          style: TextStyle(fontSize: 14.0),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      top: BorderSide(color: ui.Colors.linkWater, width: 0.0),
-                                      bottom: BorderSide(color: ui.Colors.linkWater, width: 0.0),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: GestureDetector(
+                              child: Container(
+                                padding: const EdgeInsets.only(
+                                  top: 14.0,
+                                  bottom: 14.0,
+                                  left: 10.0,
+                                ),
+                                child: Row(
+                                  textBaseline: TextBaseline.alphabetic,
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  children: <Widget>[
+                                    Icon(
+                                      blob.type == TreeItemType.blob
+                                          ? TorgGitlabIcons.file
+                                          : TorgGitlabIcons.folder,
+                                      size: 16.0,
                                     ),
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 5.0),
+                                      child: Text(
+                                        blob.name,
+                                        style: TextStyle(fontSize: 14.0),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(color: ui.Colors.linkWater, width: 0.0),
+                                    bottom: BorderSide(color: ui.Colors.linkWater, width: 0.0),
                                   ),
                                 ),
-                                onTap: () {
-                                  if (blob.type == TreeItemType.tree) {
-                                    bloc.setPath.add(blob.path);
-                                  }
-                                },
                               ),
-                            );
-                          },
-                          childCount: tree.length,
-                        ),
-                      );
-                    }
+                              onTap: () {
+                                if (blob.type == TreeItemType.tree) {
+                                  bloc.setPath.add(blob.path);
+                                }
+                              },
+                            ),
+                          );
+                        },
+                        childCount: tree.length,
+                      ),
+                    );
+                  }
 
-                    return sliverLoadingView;
-                  },
-                );
-              }
-
-              return sliverLoadingView;
+                  return sliverLoadingView;
+                },
+              );
             },
-          )
+          ),
         ],
       ),
     );
