@@ -40,10 +40,14 @@ class RepositoryBloc implements BlocBase {
   StreamController<List<TreeItem>> _treeController = StreamController.broadcast();
   Stream<List<TreeItem>> get tree => _treeController.stream;
 
+  StreamController _refreshController = StreamController.broadcast();
+  StreamSink get refresh => _refreshController.sink;
+
   RepositoryBloc() {
     _initController.stream.listen(_onInit);
     _pathController.stream.listen(_onPathChanged);
     _branchController.stream.listen(_onBranchChanged);
+    _refreshController.stream.listen(_onRefreshRequested);
   }
 
   void _onInit(RepositoryTreeRequest tree) {
@@ -59,6 +63,8 @@ class RepositoryBloc implements BlocBase {
     _currentRepoTree.branch = branch;
     _getRepoTree();
   }
+
+  void _onRefreshRequested(_) => _getRepoTree();
 
   Future<void> _getRepoTree() async {
     // TODO: add pagination
@@ -76,8 +82,12 @@ class RepositoryBloc implements BlocBase {
       _treeController.sink.add(tree);
     } on ApiError catch (error) {
       print(error);
-      _treeController.sink.add(null);
       _errorController.sink.add(error);
+
+      _currentRepoTree.path = '';
+      _currentRepoTree.branch = 'develop';
+
+      _getRepoTree();
     } finally {
       _treeLoadingInProgressController.sink.add(false);
     }
@@ -90,5 +100,6 @@ class RepositoryBloc implements BlocBase {
     _treeController.close();
     _errorController.close();
     _branchController.close();
+    _refreshController.close();
   }
 }

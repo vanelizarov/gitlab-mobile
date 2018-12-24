@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
-// import 'package:torg_gitlab/tools/api.dart';
+import 'package:torg_gitlab/tools/api.dart';
 import 'package:torg_gitlab/tools/icons.dart';
 import 'package:torg_gitlab/tools/bloc_provider.dart';
 
@@ -11,13 +11,19 @@ import 'package:torg_gitlab/models/project.dart';
 import 'package:torg_gitlab/models/tree_item.dart';
 import 'package:torg_gitlab/models/branch.dart';
 
+import 'file_viewer.dart';
+
+class Breadcrumb {
+  final String path;
+  final String name;
+
+  const Breadcrumb({this.path, this.name});
+}
+
 class RepositoryView extends StatelessWidget {
+  final Api _api = Api();
   final Project _project;
   final List<TreeItem> _initialTree;
-
-  // String _currentBranch = 'develop';
-  // int _currentBranchIndex;
-  // bool _isGettingBranches = false;
 
   RepositoryView({
     Project project,
@@ -25,56 +31,108 @@ class RepositoryView extends StatelessWidget {
   })  : _project = project,
         _initialTree = initialTree;
 
-  // Future<void> _displayBranchPicker() async {
-  //   setState(() => _isGettingBranches = true);
+  Future<Branch> _displayBranchPicker({BuildContext context, String prevSelectedBranchName}) async {
+    final List<Branch> branches = await _api.getBranchesForProject(projectId: _project.id);
 
-  //   final List<Branch> branches = await _api.getBranchesForProject(projectId: widget._project.id);
+    final int prevSelectedBranchIndex = branches.indexWhere(
+      (branch) => branch.name == prevSelectedBranchName,
+    );
 
-  //   setState(() => _isGettingBranches = false);
+    FixedExtentScrollController controller = FixedExtentScrollController(
+      initialItem: prevSelectedBranchIndex != -1 ? prevSelectedBranchIndex : 0,
+    );
 
-  //   FixedExtentScrollController controller;
+    Branch selectedBranch;
 
-  //   if (_currentBranchIndex == null) {
-  //     final int activeIndex = branches.indexWhere((Branch branch) => branch.name == _currentBranch);
-  //     controller = FixedExtentScrollController(
-  //       initialItem: activeIndex != null ? activeIndex : 0,
-  //     );
-  //   } else {
-  //     controller = FixedExtentScrollController(initialItem: _currentBranchIndex);
-  //   }
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (_) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                color: ui.Colors.white,
+                border: Border(
+                  bottom: BorderSide(
+                    color: ui.Colors.linkWater,
+                    width: 0.0,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  CupertinoButton(
+                    child: Text(
+                      'Done',
+                      style: TextStyle(fontSize: 14.0),
+                    ),
+                    onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0,
+                      vertical: 5.0,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              height: ui.kPickerSheetHeight,
+              color: ui.Colors.white,
+              child: CupertinoPicker(
+                scrollController: controller,
+                children: List<Widget>.generate(
+                  branches.length,
+                  (int index) {
+                    return Center(
+                      child: Text(branches[index].name),
+                    );
+                  },
+                ),
+                onSelectedItemChanged: (int index) => selectedBranch = branches[index],
+                itemExtent: ui.kPickerItemHeight,
+                useMagnifier: false,
+                backgroundColor: ui.Colors.whiteSmoke,
+                diameterRatio: ui.kPickerSheetHeight * 2,
+                offAxisFraction: 0,
+              ),
+            )
+          ],
+        );
+      },
+    );
 
-  //   await showCupertinoModalPopup(
-  //     context: context,
-  //     builder: (_) {
-  //       return Container(
-  //         height: _kPickerSheetHeight,
-  //         color: ui.Colors.white,
-  //         child: CupertinoPicker(
-  //           scrollController: controller,
-  //           children: List<Widget>.generate(branches.length, (int index) {
-  //             return Center(
-  //               child: Text(branches[index].name),
-  //             );
-  //           }),
-  //           onSelectedItemChanged: (int index) {
-  //             setState(() {
-  //               _currentBranch = branches[index].name;
-  //               _currentBranchIndex = index;
-  //             });
-  //           },
-  //           itemExtent: _kPickerItemHeight,
-  //           useMagnifier: true,
-  //           backgroundColor: ui.Colors.white,
-  //           diameterRatio: _kPickerSheetHeight * 2,
-  //           offAxisFraction: 0,
-  //           // magnification: 1.1,
-  //         ),
-  //       );
-  //     },
-  //   );
+    return selectedBranch;
+  }
 
-  //   print('closed');
-  // }
+  List<Breadcrumb> _buildBreadcrumbs(String path) {
+    final List<Breadcrumb> breadcrumbs = [Breadcrumb(path: '', name: '/')];
+
+    if (path == '') {
+      return breadcrumbs;
+    }
+
+    final List<String> segments = path.split('/');
+
+    for (int index = 0; index < segments.length; index++) {
+      final String prevPath = breadcrumbs[breadcrumbs.length - 1].path;
+
+      if (prevPath == '') {
+        breadcrumbs.add(Breadcrumb(
+          path: segments[index],
+          name: segments[index],
+        ));
+      } else {
+        breadcrumbs.add(Breadcrumb(
+          path: breadcrumbs[breadcrumbs.length - 1].path + '/' + segments[index],
+          name: segments[index],
+        ));
+      }
+    }
+
+    return breadcrumbs;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,47 +160,116 @@ class RepositoryView extends StatelessWidget {
       color: ui.Colors.white,
       child: CustomScrollView(
         slivers: <Widget>[
+          CupertinoSliverRefreshControl(
+            onRefresh: () async {
+              bloc.refresh.add(null);
+            },
+          ),
           SliverToBoxAdapter(
-            child: Container(
-              child: ui.Button(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Expanded(
-                        child: StreamBuilder(
-                          stream: bloc.branch,
-                          initialData: _project.defaultBranch,
-                          builder: (_, AsyncSnapshot<String> snapshot) {
-                            return Text(
+            child: StreamBuilder(
+              stream: bloc.branch,
+              initialData: _project.defaultBranch,
+              builder: (_, AsyncSnapshot<String> snapshot) {
+                return Container(
+                  child: ui.Button(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
                               snapshot.data,
                               style: TextStyle(color: ui.Colors.deepBlue),
                               overflow: TextOverflow.ellipsis,
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+                          Icon(
+                            TorgGitlabIcons.arrow_down,
+                            color: ui.Colors.greyChateau,
+                          ),
+                        ],
                       ),
-                      Icon(
-                        TorgGitlabIcons.arrow_down,
-                        color: ui.Colors.greyChateau,
-                      ),
-                    ],
+                    ),
+                    color: ui.Colors.white,
+                    border: Border.all(
+                      color: ui.Colors.linkWater,
+                      style: BorderStyle.solid,
+                      width: 1.0,
+                    ),
+                    onPressed: () async {
+                      final Branch selectedBranch = await _displayBranchPicker(
+                        context: context,
+                        prevSelectedBranchName: snapshot.data,
+                      );
+
+                      if (selectedBranch != null && selectedBranch.name != snapshot.data) {
+                        bloc.setBranch.add(selectedBranch.name);
+                      }
+                    },
                   ),
-                ),
-                color: ui.Colors.white,
-                border: Border.all(
-                  color: ui.Colors.linkWater,
-                  style: BorderStyle.solid,
-                  width: 1.0,
-                ),
-                onPressed: () {
-                  // TODO: add branch switching through picker
-                  bloc.setBranch.add('master');
-                },
-              ),
-              padding: const EdgeInsets.all(10.0),
+                  padding: const EdgeInsets.all(10.0),
+                );
+              },
             ),
+          ),
+          StreamBuilder(
+            stream: bloc.path,
+            initialData: '',
+            builder: (_, AsyncSnapshot<String> snapshot) {
+              if (snapshot.hasData) {
+                final List<Breadcrumb> breadcrumbs = _buildBreadcrumbs(snapshot.data);
+
+                return SliverToBoxAdapter(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      margin: const EdgeInsets.only(bottom: 10.0),
+                      child: Row(
+                        children: breadcrumbs.map<Widget>((breadcrumb) {
+                          final bool isLast =
+                              breadcrumbs.indexOf(breadcrumb) == breadcrumbs.length - 1;
+
+                          return GestureDetector(
+                            child: Container(
+                              child: Text(
+                                breadcrumb.name,
+                                style: TextStyle(
+                                  color: !isLast ? ui.Colors.blue : ui.Colors.white,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                                vertical: 5.0,
+                              ),
+                              margin: !isLast ? const EdgeInsets.only(right: 5.0) : null,
+                              decoration: BoxDecoration(
+                                color: !isLast
+                                    ? Color.fromARGB(
+                                        50,
+                                        ui.Colors.blue.red,
+                                        ui.Colors.blue.green,
+                                        ui.Colors.blue.blue,
+                                      )
+                                    : ui.Colors.blue,
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                            onTap: !isLast ? () => bloc.setPath.add(breadcrumb.path) : null,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return SliverToBoxAdapter(
+                child: Container(),
+              );
+            },
           ),
           StreamBuilder(
             stream: bloc.tree,
@@ -163,47 +290,22 @@ class RepositoryView extends StatelessWidget {
                         (_, int index) {
                           final TreeItem blob = tree[index];
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: GestureDetector(
-                              child: Container(
-                                padding: const EdgeInsets.only(
-                                  top: 14.0,
-                                  bottom: 14.0,
-                                  left: 10.0,
-                                ),
-                                child: Row(
-                                  textBaseline: TextBaseline.alphabetic,
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                                  children: <Widget>[
-                                    Icon(
-                                      blob.type == TreeItemType.blob
-                                          ? TorgGitlabIcons.file
-                                          : TorgGitlabIcons.folder,
-                                      size: 16.0,
-                                    ),
-                                    Container(
-                                      margin: const EdgeInsets.only(left: 5.0),
-                                      child: Text(
-                                        blob.name,
-                                        style: TextStyle(fontSize: 14.0),
+                          return _TreeItemRow(
+                            blob: blob,
+                            onTap: () {
+                              if (blob.type == TreeItemType.tree) {
+                                bloc.setPath.add(blob.path);
+                              } else if (blob.type == TreeItemType.blob) {
+                                showCupertinoDialog(
+                                  builder: (_) => FileViewer(
+                                        projectId: _project.id,
+                                        branch: 'develop',
+                                        filePath: blob.path,
                                       ),
-                                    )
-                                  ],
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    top: BorderSide(color: ui.Colors.linkWater, width: 0.0),
-                                    bottom: BorderSide(color: ui.Colors.linkWater, width: 0.0),
-                                  ),
-                                ),
-                              ),
-                              onTap: () {
-                                if (blob.type == TreeItemType.tree) {
-                                  bloc.setPath.add(blob.path);
-                                }
-                              },
-                            ),
+                                  context: context,
+                                );
+                              }
+                            },
                           );
                         },
                         childCount: tree.length,
@@ -217,6 +319,83 @@ class RepositoryView extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TreeItemRow extends StatefulWidget {
+  final TreeItem blob;
+  final GestureTapCallback onTap;
+
+  _TreeItemRow({this.blob, this.onTap});
+
+  @override
+  __TreeItemRowState createState() => __TreeItemRowState();
+}
+
+class __TreeItemRowState extends State<_TreeItemRow> {
+  bool _needsHighlight = false;
+
+  _onTapUp(_) {
+    setState(() => _needsHighlight = false);
+  }
+
+  _onTapDown(_) {
+    setState(() => _needsHighlight = true);
+  }
+
+  _onTapCancel() {
+    setState(() => _needsHighlight = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: GestureDetector(
+        child: Container(
+          padding: const EdgeInsets.only(
+            top: 14.0,
+            bottom: 14.0,
+            left: 10.0,
+          ),
+          child: Row(
+            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            children: <Widget>[
+              Icon(
+                widget.blob.type == TreeItemType.blob
+                    ? TorgGitlabIcons.file
+                    : TorgGitlabIcons.folder,
+                size: 16.0,
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 5.0),
+                child: Text(
+                  widget.blob.name,
+                  style: TextStyle(fontSize: 14.0),
+                ),
+              )
+            ],
+          ),
+          decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: _needsHighlight ? Color(0xffb8d6f4) : ui.Colors.linkWater,
+                  width: 0.0,
+                ),
+                bottom: BorderSide(
+                  color: _needsHighlight ? Color(0xffb8d6f4) : ui.Colors.linkWater,
+                  width: 0.0,
+                ),
+              ),
+              color: _needsHighlight ? Color(0xfff6fafe) : ui.Colors.white),
+        ),
+        onTap: widget.onTap,
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
       ),
     );
   }

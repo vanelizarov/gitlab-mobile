@@ -65,7 +65,10 @@ class Api {
   }
 
   Future<List<Branch>> getBranchesForProject({int projectId}) async {
-    final String uri = _buildUri('/projects/$projectId/repository/branches');
+    final String uri = _buildUri(
+      '/projects/$projectId/repository/branches',
+      queryParams: <String, String>{'per_page': '100'},
+    );
     final http.Response res = await http.get(uri);
 
     if (res.statusCode == 200) {
@@ -100,6 +103,21 @@ class Api {
       final List<dynamic> rawTreeItems = _decodeResponse(res);
 
       return rawTreeItems.map<TreeItem>((raw) => TreeItem.fromJson(raw)).toList();
+    }
+
+    throw ApiError.fromJson(_decodeResponse(res));
+  }
+
+  Future<String> getFileContents({int projectId, String filePath, String branch}) async {
+    final String uri = _buildUri(
+      '/projects/$projectId/repository/files/${Uri.encodeComponent(filePath)}/raw',
+      queryParams: <String, String>{'ref': branch},
+    );
+
+    final http.Response res = await http.get(uri);
+
+    if (res.statusCode == 200) {
+      return utf8.decode(res.bodyBytes);
     }
 
     throw ApiError.fromJson(_decodeResponse(res));
