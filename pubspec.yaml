@@ -27,3 +27,6 @@ flutter:
     - family: TorgGitlabIcons
       fonts:
         - asset: assets/fonts/TorgGitlabIcons.ttf
+    - family: MenloRegular
+      fonts:
+        - asset: assets/fonts/MenloRegular.ttf

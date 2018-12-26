@@ -296,13 +296,15 @@ class RepositoryView extends StatelessWidget {
                               if (blob.type == TreeItemType.tree) {
                                 bloc.setPath.add(blob.path);
                               } else if (blob.type == TreeItemType.blob) {
-                                showCupertinoDialog(
-                                  builder: (_) => FileViewer(
-                                        projectId: _project.id,
-                                        branch: 'develop',
-                                        filePath: blob.path,
-                                      ),
-                                  context: context,
+                                Navigator.of(context).push(
+                                  CupertinoPageRoute(
+                                    builder: (_) => FileViewer(
+                                          projectId: _project.id,
+                                          branch: 'develop',
+                                          filePath: blob.path,
+                                          fileName: blob.name,
+                                        ),
+                                  ),
                                 );
                               }
                             },

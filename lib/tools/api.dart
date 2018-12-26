@@ -8,8 +8,9 @@ import 'package:torg_gitlab/models/user.dart';
 import 'package:torg_gitlab/models/error.dart';
 import 'package:torg_gitlab/models/branch.dart';
 import 'package:torg_gitlab/models/tree_item.dart';
+import 'package:torg_gitlab/models/file.dart';
 
-const String kApiPrefix = 'torgteam.cf';
+const String kBaseUrl = 'http://torgteam.cf/api/v4';
 
 class Api {
   static final Api _instance = Api._();
@@ -31,11 +32,16 @@ class Api {
 
     newQueryParams.addAll({'private_token': token});
 
-    return Uri.http(
-      kApiPrefix,
-      '/api/v4' + path,
-      newQueryParams,
-    ).toString();
+    List<String> queryParamsArr = [];
+    newQueryParams.forEach((key, value) => queryParamsArr.add('$key=$value'));
+
+    return kBaseUrl + path + '?' + queryParamsArr.join('&');
+
+    // return Uri.http(
+    //   kApiPrefix,
+    //   '/api/v4' + path,
+    //   newQueryParams,
+    // ).toString();
   }
 
   dynamic _decodeResponse(http.Response res) => json.decode(utf8.decode(res.bodyBytes));
@@ -108,16 +114,29 @@ class Api {
     throw ApiError.fromJson(_decodeResponse(res));
   }
 
-  Future<String> getFileContents({int projectId, String filePath, String branch}) async {
+  Future<File> getFile({int projectId, String filePath, String branch}) async {
+    final String encodedFilePath = Uri.encodeComponent(filePath);
     final String uri = _buildUri(
-      '/projects/$projectId/repository/files/${Uri.encodeComponent(filePath)}/raw',
+      '/projects/$projectId/repository/files/$encodedFilePath/raw',
       queryParams: <String, String>{'ref': branch},
     );
 
     final http.Response res = await http.get(uri);
 
     if (res.statusCode == 200) {
-      return utf8.decode(res.bodyBytes);
+      // return File.fromJson(_decodeResponse(res));
+      return File(
+        name: res.headers['x-gitlab-file-name'],
+        blobId: res.headers['x-gitlab-blob-id'],
+        commitId: res.headers['x-gitlab-commit-id'],
+        contentSha256: res.headers['x-gitlab-content-sha256'],
+        lastCommitId: res.headers['x-gitlab-last-commit-id'],
+        path: res.headers['x-gitlab-file-path'],
+        ref: res.headers['x-gitlab-ref'],
+        size: int.parse(res.headers['x-gitlab-size']),
+        content: utf8.decode(res.bodyBytes),
+        encoding: FileEncoding.base64,
+      );
     }
 
     throw ApiError.fromJson(_decodeResponse(res));
