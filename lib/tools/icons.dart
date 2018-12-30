@@ -26,4 +26,7 @@ class TorgGitlabIcons {
   static const IconData repository = const IconData(0xe803, fontFamily: _kFontFam);
   static const IconData file = const IconData(0xe804, fontFamily: _kFontFam);
   static const IconData folder = const IconData(0xe805, fontFamily: _kFontFam);
+  static const IconData increase_font_size = const IconData(0xe806, fontFamily: _kFontFam);
+  static const IconData decrease_font_size = const IconData(0xe807, fontFamily: _kFontFam);
+  static const IconData dark_mode = const IconData(0xe808, fontFamily: _kFontFam);
 }

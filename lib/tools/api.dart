@@ -18,7 +18,10 @@ class Api {
   final Storage _storage = Storage();
 
   get token => _storage.get('token');
-  set token(String token) => _storage.set('token', token);
+  set token(String token) {
+    _storage.set('token', token);
+    _storage.save();
+  }
 
   factory Api() => _instance;
   Api._();

@@ -6,6 +6,7 @@ import 'package:torg_gitlab/tools/icons.dart';
 import 'package:torg_gitlab/tools/bloc_provider.dart';
 
 import 'package:torg_gitlab/blocs/repository_bloc.dart';
+import 'package:torg_gitlab/blocs/file_viewer_bloc.dart';
 
 import 'package:torg_gitlab/models/project.dart';
 import 'package:torg_gitlab/models/tree_item.dart';
@@ -298,12 +299,18 @@ class RepositoryView extends StatelessWidget {
                               } else if (blob.type == TreeItemType.blob) {
                                 Navigator.of(context).push(
                                   CupertinoPageRoute(
-                                    builder: (_) => FileViewer(
+                                    builder: (_) {
+                                      return BlocProvider<FileViewerBloc>(
+                                        child: FileViewer(
                                           projectId: _project.id,
                                           branch: 'develop',
                                           filePath: blob.path,
                                           fileName: blob.name,
                                         ),
+                                        bloc: FileViewerBloc(),
+                                      );
+                                    },
+                                    fullscreenDialog: true,
                                   ),
                                 );
                               }
