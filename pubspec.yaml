@@ -24,6 +24,9 @@ flutter:
   uses-material-design: false
 
   fonts:
-    - family: TorgGitlabIcons
+    - family: Icons
       fonts:
-        - asset: assets/fonts/TorgGitlabIcons.ttf
+        - asset: assets/fonts/Icons.ttf
+    - family: MenloRegular
+      fonts:
+        - asset: assets/fonts/MenloRegular.ttf

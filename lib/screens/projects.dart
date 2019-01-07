@@ -28,6 +28,10 @@ class ProjectsPage extends StatelessWidget {
               margin: const EdgeInsets.only(right: 15.0),
               width: 40.0,
               height: 40.0,
+              decoration: BoxDecoration(
+                border: Border.all(color: ui.Colors.linkWater, width: 0.0),
+                borderRadius: BorderRadius.circular(20.0),
+              ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

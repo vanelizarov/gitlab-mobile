@@ -33,7 +33,7 @@ class AuthPage extends StatelessWidget {
               child: ui.TextField(
                 autofocus: true,
                 placeholder: 'Personal access token',
-                text: 'bg3GzUXMpcvA3tVouy75',
+                text: '6sHz14sVVuudt_sU-zBM',
                 onChanged: (String token) => bloc.setToken.add(token),
                 focusNode: focusNode,
                 disabledStream: bloc.authInProgress,

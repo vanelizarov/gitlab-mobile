@@ -1,23 +1,23 @@
-enum TreeItemType { tree, blob }
+enum BlobType { tree, blob }
 
-class TreeItem {
+class Blob {
   final String id;
   final String name;
-  final TreeItemType type;
+  final BlobType type;
   final String path;
 
-  TreeItem({
+  Blob({
     this.id,
     this.name,
     this.type,
     this.path,
   });
 
-  factory TreeItem.fromJson(Map<String, dynamic> json) {
-    return TreeItem(
+  factory Blob.fromJson(Map<String, dynamic> json) {
+    return Blob(
       id: json['id'],
       name: json['name'],
-      type: json['type'] == 'tree' ? TreeItemType.tree : TreeItemType.blob,
+      type: json['type'] == 'tree' ? BlobType.tree : BlobType.blob,
       path: json['path'],
     );
   }

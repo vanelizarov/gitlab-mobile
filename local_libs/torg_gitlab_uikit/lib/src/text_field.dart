@@ -95,7 +95,10 @@ class _TextFieldState extends State<TextField> {
               borderRadius: BorderRadius.circular(5.0),
             ),
             focusNode: widget.focusNode,
-            style: TextStyle(color: Colors.deepBlue),
+            style: TextStyle(
+              color: Colors.deepBlue,
+              fontSize: 14.0,
+            ),
           );
         },
       );
