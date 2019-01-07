@@ -3,11 +3,13 @@ import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
 
 import 'package:torg_gitlab/tools/icons.dart';
 import 'package:torg_gitlab/tools/api.dart';
-import 'package:torg_gitlab/models/project.dart';
-import 'package:torg_gitlab/models/tree_item.dart';
-
 import 'package:torg_gitlab/tools/bloc_provider.dart';
+
+import 'package:torg_gitlab/models/project.dart';
+import 'package:torg_gitlab/models/blob.dart';
+
 import 'package:torg_gitlab/blocs/repository_bloc.dart';
+
 import 'repository.dart';
 
 class ProjectPage extends StatelessWidget {
@@ -56,14 +58,14 @@ class ProjectPage extends StatelessWidget {
             BottomNavigationBarItem(
               title: Text('Repository'),
               icon: Icon(
-                TorgGitlabIcons.repository,
+                Icons.repository,
                 size: 20.0,
               ),
             ),
             BottomNavigationBarItem(
               title: Text('Merge Requests'),
               icon: Icon(
-                TorgGitlabIcons.merge_requests,
+                Icons.merge_requests,
                 size: 20.0,
               ),
             ),
@@ -79,7 +81,7 @@ class ProjectPage extends StatelessWidget {
                   branch: _project.defaultBranch,
                   path: '',
                 ),
-                builder: (_, AsyncSnapshot<List<TreeItem>> snapshot) {
+                builder: (_, AsyncSnapshot<List<Blob>> snapshot) {
                   if (snapshot.hasData) {
                     return RepositoryView(
                       project: _project,

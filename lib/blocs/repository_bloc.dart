@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:torg_gitlab/tools/api.dart';
 import 'package:torg_gitlab/tools/bloc_provider.dart';
 
-import 'package:torg_gitlab/models/tree_item.dart';
+import 'package:torg_gitlab/models/blob.dart';
 import 'package:torg_gitlab/models/error.dart';
 
 class RepositoryTreeRequest {
@@ -37,8 +37,8 @@ class RepositoryBloc implements BlocBase {
   StreamController<bool> _treeLoadingInProgressController = StreamController<bool>.broadcast();
   Stream<bool> get isTreeLoading => _treeLoadingInProgressController.stream;
 
-  StreamController<List<TreeItem>> _treeController = StreamController.broadcast();
-  Stream<List<TreeItem>> get tree => _treeController.stream;
+  StreamController<List<Blob>> _treeController = StreamController.broadcast();
+  Stream<List<Blob>> get tree => _treeController.stream;
 
   StreamController _refreshController = StreamController.broadcast();
   StreamSink get refresh => _refreshController.sink;
@@ -73,7 +73,7 @@ class RepositoryBloc implements BlocBase {
     _errorController.sink.add(null);
 
     try {
-      final List<TreeItem> tree = await _api.getRepositoryTree(
+      final List<Blob> tree = await _api.getRepositoryTree(
         projectId: _currentRepoTree.projectId,
         branch: _currentRepoTree.branch,
         path: _currentRepoTree.path,

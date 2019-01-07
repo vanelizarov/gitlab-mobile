@@ -8,9 +8,11 @@ import 'package:torg_gitlab/tools/api.dart';
 import 'package:torg_gitlab/tools/bloc_provider.dart';
 import 'package:torg_gitlab/tools/keywords.dart';
 import 'package:torg_gitlab/tools/icons.dart';
-import 'package:torg_gitlab/tools/bidirectional_scroll_view.dart';
 
 import 'package:torg_gitlab/models/file.dart';
+
+import 'package:torg_gitlab/views/bidirectional_scroll_view.dart';
+import 'package:torg_gitlab/views/fab.dart';
 
 enum _IndentSize { twoSpaces, fourSpaces }
 enum _IndentType { spaces, tabs }
@@ -228,169 +230,176 @@ class FileViewer extends StatelessWidget {
                 child: Stack(
                   children: <Widget>[
                     BidirectionalScrollView(
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            child: StreamBuilder(
-                              stream: bloc.fontSize,
-                              initialData: _fontSize,
-                              builder: (_, AsyncSnapshot<double> snapshot) {
-                                return Column(
-                                  children: List.generate(
-                                    fileSnapshot.data.content.split('\n').length,
-                                    (int index) {
-                                      return Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          fontSize: snapshot.data,
-                                          fontFamily: 'MenloRegular',
-                                          color: ui.Colors.greyRaven,
+                      child: SafeArea(
+                        top: false,
+                        child: Row(
+                          children: <Widget>[
+                            Container(
+                              child: StreamBuilder(
+                                stream: bloc.fontSize,
+                                initialData: _fontSize,
+                                builder: (_, AsyncSnapshot<double> snapshot) {
+                                  return Column(
+                                    children: List.generate(
+                                      fileSnapshot.data.content.split('\n').length,
+                                      (int index) {
+                                        return Text(
+                                          '${index + 1}',
+                                          style: TextStyle(
+                                            fontSize: snapshot.data,
+                                            fontFamily: 'MenloRegular',
+                                            color: ui.Colors.greyRaven,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        );
+                                      },
+                                    ),
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                  );
+                                },
+                              ),
+                              padding: const EdgeInsets.only(
+                                top: 10.0,
+                                right: 5.0,
+                                left: 10.0,
+                                bottom: 10.0,
+                              ),
+                              margin: const EdgeInsets.only(
+                                bottom: 60.0,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: ui.Colors.linkWater,
+                                    width: 0.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              child: StreamBuilder(
+                                stream: bloc.fontSize,
+                                initialData: _fontSize,
+                                builder: (_, AsyncSnapshot<double> snapshot) {
+                                  final double fontSize = snapshot.data;
+
+                                  return StreamBuilder(
+                                    stream: bloc.isThemeDark,
+                                    initialData: _isThemeDark,
+                                    builder: (_, AsyncSnapshot<bool> snapshot) {
+                                      final bool isDarkThemeEnabled = snapshot.data;
+                                      final _CodeTheme theme =
+                                          isDarkThemeEnabled ? _kDarkCodeTheme : _kLightCodeTheme;
+
+                                      final List<TextSpan> codeSpans = _indentAndHighlight(
+                                        fileSnapshot.data,
+                                      ).map(
+                                        (fragment) {
+                                          return TextSpan(
+                                            text: fragment.text,
+                                            style: TextStyle(
+                                              color: fragment.isHighlighted
+                                                  ? theme.highlightedTextColor
+                                                  : theme.plainTextColor,
+                                            ),
+                                          );
+                                        },
+                                      ).toList();
+
+                                      return RichText(
+                                        text: TextSpan(
+                                          children: codeSpans,
+                                          style: TextStyle(
+                                            fontSize: fontSize,
+                                            fontFamily: 'MenloRegular',
+                                          ),
                                         ),
                                       );
                                     },
-                                  ),
-                                );
-                              },
-                            ),
-                            padding: const EdgeInsets.only(
-                              top: 10.0,
-                              right: 5.0,
-                              bottom: 52.0,
-                              left: 10.0,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  color: ui.Colors.linkWater,
-                                  width: 0.0,
-                                ),
+                                  );
+                                },
                               ),
-                            ),
-                          ),
-                          Container(
-                            child: StreamBuilder(
-                              stream: bloc.fontSize,
-                              initialData: _fontSize,
-                              builder: (_, AsyncSnapshot<double> snapshot) {
-                                final double fontSize = snapshot.data;
-
-                                return StreamBuilder(
-                                  stream: bloc.isThemeDark,
-                                  initialData: _isThemeDark,
-                                  builder: (_, AsyncSnapshot<bool> snapshot) {
-                                    final bool isDarkThemeEnabled = snapshot.data;
-                                    final _CodeTheme theme =
-                                        isDarkThemeEnabled ? _kDarkCodeTheme : _kLightCodeTheme;
-
-                                    final List<TextSpan> codeSpans = _indentAndHighlight(
-                                      fileSnapshot.data,
-                                    ).map(
-                                      (fragment) {
-                                        return TextSpan(
-                                          text: fragment.text,
-                                          style: TextStyle(
-                                            color: fragment.isHighlighted
-                                                ? theme.highlightedTextColor
-                                                : theme.plainTextColor,
-                                          ),
-                                        );
-                                      },
-                                    ).toList();
-
-                                    return RichText(
-                                      text: TextSpan(
-                                        children: codeSpans,
-                                        style: TextStyle(
-                                          fontSize: fontSize,
-                                          fontFamily: 'MenloRegular',
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                            padding: const EdgeInsets.only(
-                              top: 10.0,
-                              right: 10.0,
-                              bottom: 52.0,
-                              left: 5.0,
-                            ),
-                          )
-                        ],
+                              padding: const EdgeInsets.only(
+                                top: 10.0,
+                                right: 10.0,
+                                left: 5.0,
+                                bottom: 10.0,
+                              ),
+                              margin: const EdgeInsets.only(
+                                bottom: 60.0,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                     Positioned(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          GestureDetector(
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              margin: const EdgeInsets.only(right: 10.0),
-                              child: Center(
-                                child: Icon(
-                                  TorgGitlabIcons.dark_mode,
-                                  color: isDarkThemeEnabled ? ui.Colors.blue : ui.Colors.white,
-                                  size: 16.0,
-                                ),
-                              ),
-                              decoration: BoxDecoration(
-                                color: ui.Colors.deepBlue,
+                      bottom: 0.0,
+                      right: 0.0,
+                      left: 0.0,
+                      child: SafeArea(
+                        child: Container(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Fab(
+                                icon: Icons.dark_mode,
+                                iconColor: isDarkThemeEnabled ? ui.Colors.blue : ui.Colors.white,
                                 borderRadius: BorderRadius.circular(5.0),
+                                onTap: () => bloc.setThemeIsDark.add(!isDarkThemeEnabled),
                               ),
-                            ),
-                            onTap: () => bloc.setThemeIsDark.add(!isDarkThemeEnabled),
+                              //
+                              Container(width: 10.0),
+                              //
+                              Fab(
+                                icon: Icons.decrease_font_size,
+                                iconColor: ui.Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(5.0),
+                                  bottomLeft: Radius.circular(5.0),
+                                ),
+                                onTap: () {
+                                  if (_fontSize - 1 < 8) {
+                                    return;
+                                  }
+
+                                  bloc.changeFontSize.add(--_fontSize);
+                                },
+                              ),
+                              //
+                              Container(
+                                width: 0.5,
+                                height: 40,
+                                color: ui.Colors.deepBlue,
+                                child: Center(
+                                  child: Container(
+                                    color: ui.Colors.linkWater,
+                                    height: 20,
+                                  ),
+                                ),
+                              ),
+                              //
+                              Fab(
+                                icon: Icons.increase_font_size,
+                                iconColor: ui.Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(5.0),
+                                  bottomRight: Radius.circular(5.0),
+                                ),
+                                onTap: () {
+                                  if (_fontSize + 1 > 18) {
+                                    return;
+                                  }
+
+                                  bloc.changeFontSize.add(++_fontSize);
+                                },
+                              ),
+                            ],
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: ui.Colors.deepBlue,
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                GestureDetector(
-                                  child: Container(
-                                    width: 32,
-                                    height: 32,
-                                    child: Center(
-                                      child: Icon(
-                                        TorgGitlabIcons.decrease_font_size,
-                                        color: ui.Colors.white,
-                                        size: 16.0,
-                                      ),
-                                    ),
-                                  ),
-                                  onTap: () => bloc.changeFontSize.add(--_fontSize),
-                                ),
-                                Container(
-                                  width: 0.5,
-                                  height: 20,
-                                  color: ui.Colors.linkWater,
-                                ),
-                                GestureDetector(
-                                  child: Container(
-                                    width: 32,
-                                    height: 32,
-                                    child: Center(
-                                      child: Icon(
-                                        TorgGitlabIcons.increase_font_size,
-                                        color: ui.Colors.white,
-                                        size: 16.0,
-                                      ),
-                                    ),
-                                  ),
-                                  onTap: () => bloc.changeFontSize.add(++_fontSize),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
+                        ),
                       ),
-                      bottom: 10.0,
-                      right: 10.0,
                     )
                   ],
                 ),

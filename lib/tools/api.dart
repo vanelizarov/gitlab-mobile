@@ -7,7 +7,7 @@ import 'package:torg_gitlab/models/project.dart';
 import 'package:torg_gitlab/models/user.dart';
 import 'package:torg_gitlab/models/error.dart';
 import 'package:torg_gitlab/models/branch.dart';
-import 'package:torg_gitlab/models/tree_item.dart';
+import 'package:torg_gitlab/models/blob.dart';
 import 'package:torg_gitlab/models/file.dart';
 
 const String kBaseUrl = 'http://torgteam.cf/api/v4';
@@ -89,7 +89,7 @@ class Api {
     throw ApiError.fromJson(_decodeResponse(res));
   }
 
-  Future<List<TreeItem>> getRepositoryTree({
+  Future<List<Blob>> getRepositoryTree({
     int projectId,
     String path,
     String branch,
@@ -111,7 +111,7 @@ class Api {
     if (res.statusCode == 200) {
       final List<dynamic> rawTreeItems = _decodeResponse(res);
 
-      return rawTreeItems.map<TreeItem>((raw) => TreeItem.fromJson(raw)).toList();
+      return rawTreeItems.map<Blob>((raw) => Blob.fromJson(raw)).toList();
     }
 
     throw ApiError.fromJson(_decodeResponse(res));

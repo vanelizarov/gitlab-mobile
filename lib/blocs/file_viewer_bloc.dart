@@ -7,7 +7,7 @@ class FileViewerBloc extends BlocBase {
   Stream<bool> get isThemeDark => _isThemeDarkController.stream;
 
   StreamController<double> _fontSizeController = StreamController<double>.broadcast();
-  StreamSink get changeFontSize => _fontSizeController.sink;
+  StreamSink<double> get changeFontSize => _fontSizeController.sink;
   Stream<double> get fontSize => _fontSizeController.stream;
 
   void dispose() {

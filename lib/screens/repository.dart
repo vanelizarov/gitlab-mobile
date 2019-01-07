@@ -9,40 +9,29 @@ import 'package:torg_gitlab/blocs/repository_bloc.dart';
 import 'package:torg_gitlab/blocs/file_viewer_bloc.dart';
 
 import 'package:torg_gitlab/models/project.dart';
-import 'package:torg_gitlab/models/tree_item.dart';
+import 'package:torg_gitlab/models/blob.dart';
 import 'package:torg_gitlab/models/branch.dart';
 
+import 'package:torg_gitlab/views/blob_row.dart';
+import 'package:torg_gitlab/views/breadcrumbs.dart';
+
 import 'file_viewer.dart';
-
-class Breadcrumb {
-  final String path;
-  final String name;
-
-  const Breadcrumb({this.path, this.name});
-}
 
 class RepositoryView extends StatelessWidget {
   final Api _api = Api();
   final Project _project;
-  final List<TreeItem> _initialTree;
+  final List<Blob> _initialTree;
 
   RepositoryView({
     Project project,
-    List<TreeItem> initialTree,
+    List<Blob> initialTree,
   })  : _project = project,
         _initialTree = initialTree;
 
-  Future<Branch> _displayBranchPicker({BuildContext context, String prevSelectedBranchName}) async {
-    final List<Branch> branches = await _api.getBranchesForProject(projectId: _project.id);
-
-    final int prevSelectedBranchIndex = branches.indexWhere(
-      (branch) => branch.name == prevSelectedBranchName,
-    );
-
-    FixedExtentScrollController controller = FixedExtentScrollController(
-      initialItem: prevSelectedBranchIndex != -1 ? prevSelectedBranchIndex : 0,
-    );
-
+  Future<Branch> _displayBranchPicker({
+    BuildContext context,
+    String prevSelectedBranchName,
+  }) async {
     Branch selectedBranch;
 
     await showCupertinoModalPopup(
@@ -71,7 +60,7 @@ class RepositoryView extends StatelessWidget {
                     ),
                     onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0,
+                      horizontal: 16.0,
                       vertical: 5.0,
                     ),
                   )
@@ -80,23 +69,44 @@ class RepositoryView extends StatelessWidget {
             ),
             Container(
               height: ui.kPickerSheetHeight,
-              color: ui.Colors.white,
-              child: CupertinoPicker(
-                scrollController: controller,
-                children: List<Widget>.generate(
-                  branches.length,
-                  (int index) {
-                    return Center(
-                      child: Text(branches[index].name),
+              color: ui.Colors.whiteSmoke,
+              child: FutureBuilder(
+                future: _api.getBranchesForProject(projectId: _project.id),
+                builder: (_, AsyncSnapshot<List<Branch>> snapshot) {
+                  if (snapshot.hasData) {
+                    final List<Branch> branches = snapshot.data;
+
+                    final int prevSelectedBranchIndex = branches.indexWhere(
+                      (branch) => branch.name == prevSelectedBranchName,
                     );
-                  },
-                ),
-                onSelectedItemChanged: (int index) => selectedBranch = branches[index],
-                itemExtent: ui.kPickerItemHeight,
-                useMagnifier: false,
-                backgroundColor: ui.Colors.whiteSmoke,
-                diameterRatio: ui.kPickerSheetHeight * 2,
-                offAxisFraction: 0,
+
+                    FixedExtentScrollController controller = FixedExtentScrollController(
+                      initialItem: prevSelectedBranchIndex != -1 ? prevSelectedBranchIndex : 0,
+                    );
+
+                    return CupertinoPicker(
+                      scrollController: controller,
+                      children: List<Widget>.generate(
+                        branches.length,
+                        (int index) {
+                          return Center(
+                            child: Text(branches[index].name),
+                          );
+                        },
+                      ),
+                      onSelectedItemChanged: (int index) => selectedBranch = branches[index],
+                      itemExtent: ui.kPickerItemHeight,
+                      useMagnifier: false,
+                      backgroundColor: ui.Colors.whiteSmoke,
+                      diameterRatio: ui.kPickerSheetHeight * 2,
+                      offAxisFraction: 0,
+                    );
+                  }
+
+                  return Center(
+                    child: CupertinoActivityIndicator(animating: true),
+                  );
+                },
               ),
             )
           ],
@@ -105,34 +115,6 @@ class RepositoryView extends StatelessWidget {
     );
 
     return selectedBranch;
-  }
-
-  List<Breadcrumb> _buildBreadcrumbs(String path) {
-    final List<Breadcrumb> breadcrumbs = [Breadcrumb(path: '', name: '/')];
-
-    if (path == '') {
-      return breadcrumbs;
-    }
-
-    final List<String> segments = path.split('/');
-
-    for (int index = 0; index < segments.length; index++) {
-      final String prevPath = breadcrumbs[breadcrumbs.length - 1].path;
-
-      if (prevPath == '') {
-        breadcrumbs.add(Breadcrumb(
-          path: segments[index],
-          name: segments[index],
-        ));
-      } else {
-        breadcrumbs.add(Breadcrumb(
-          path: breadcrumbs[breadcrumbs.length - 1].path + '/' + segments[index],
-          name: segments[index],
-        ));
-      }
-    }
-
-    return breadcrumbs;
   }
 
   @override
@@ -162,9 +144,7 @@ class RepositoryView extends StatelessWidget {
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverRefreshControl(
-            onRefresh: () async {
-              bloc.refresh.add(null);
-            },
+            onRefresh: () async => bloc.refresh.add(null),
           ),
           SliverToBoxAdapter(
             child: StreamBuilder(
@@ -181,12 +161,15 @@ class RepositoryView extends StatelessWidget {
                           Expanded(
                             child: Text(
                               snapshot.data,
-                              style: TextStyle(color: ui.Colors.deepBlue),
+                              style: TextStyle(
+                                color: ui.Colors.deepBlue,
+                                fontSize: 16.0,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Icon(
-                            TorgGitlabIcons.arrow_down,
+                            Icons.arrow_down,
                             color: ui.Colors.greyChateau,
                           ),
                         ],
@@ -219,50 +202,10 @@ class RepositoryView extends StatelessWidget {
             initialData: '',
             builder: (_, AsyncSnapshot<String> snapshot) {
               if (snapshot.hasData) {
-                final List<Breadcrumb> breadcrumbs = _buildBreadcrumbs(snapshot.data);
-
                 return SliverToBoxAdapter(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      margin: const EdgeInsets.only(bottom: 10.0),
-                      child: Row(
-                        children: breadcrumbs.map<Widget>((breadcrumb) {
-                          final bool isLast =
-                              breadcrumbs.indexOf(breadcrumb) == breadcrumbs.length - 1;
-
-                          return GestureDetector(
-                            child: Container(
-                              child: Text(
-                                breadcrumb.name,
-                                style: TextStyle(
-                                  color: !isLast ? ui.Colors.blue : ui.Colors.white,
-                                  fontSize: 14.0,
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0,
-                                vertical: 5.0,
-                              ),
-                              margin: !isLast ? const EdgeInsets.only(right: 5.0) : null,
-                              decoration: BoxDecoration(
-                                color: !isLast
-                                    ? Color.fromARGB(
-                                        50,
-                                        ui.Colors.blue.red,
-                                        ui.Colors.blue.green,
-                                        ui.Colors.blue.blue,
-                                      )
-                                    : ui.Colors.blue,
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                            ),
-                            onTap: !isLast ? () => bloc.setPath.add(breadcrumb.path) : null,
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                  child: Breadcrumbs(
+                    path: snapshot.data,
+                    onTap: (path) => bloc.setPath.add(path),
                   ),
                 );
               }
@@ -275,7 +218,7 @@ class RepositoryView extends StatelessWidget {
           StreamBuilder(
             stream: bloc.tree,
             initialData: _initialTree,
-            builder: (_, AsyncSnapshot<List<TreeItem>> treeSnapshot) {
+            builder: (_, AsyncSnapshot<List<Blob>> treeSnapshot) {
               return StreamBuilder(
                 stream: bloc.isTreeLoading,
                 builder: (_, AsyncSnapshot<bool> isTreeLoadingSnapshot) {
@@ -284,19 +227,19 @@ class RepositoryView extends StatelessWidget {
                   }
 
                   if (treeSnapshot.hasData) {
-                    final List<TreeItem> tree = treeSnapshot.data;
+                    final List<Blob> tree = treeSnapshot.data;
 
                     return SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (_, int index) {
-                          final TreeItem blob = tree[index];
+                          final Blob blob = tree[index];
 
-                          return _TreeItemRow(
+                          return BlobRow(
                             blob: blob,
                             onTap: () {
-                              if (blob.type == TreeItemType.tree) {
+                              if (blob.type == BlobType.tree) {
                                 bloc.setPath.add(blob.path);
-                              } else if (blob.type == TreeItemType.blob) {
+                              } else if (blob.type == BlobType.blob) {
                                 Navigator.of(context).push(
                                   CupertinoPageRoute(
                                     builder: (_) {
@@ -328,83 +271,6 @@ class RepositoryView extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TreeItemRow extends StatefulWidget {
-  final TreeItem blob;
-  final GestureTapCallback onTap;
-
-  _TreeItemRow({this.blob, this.onTap});
-
-  @override
-  __TreeItemRowState createState() => __TreeItemRowState();
-}
-
-class __TreeItemRowState extends State<_TreeItemRow> {
-  bool _needsHighlight = false;
-
-  _onTapUp(_) {
-    setState(() => _needsHighlight = false);
-  }
-
-  _onTapDown(_) {
-    setState(() => _needsHighlight = true);
-  }
-
-  _onTapCancel() {
-    setState(() => _needsHighlight = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: GestureDetector(
-        child: Container(
-          padding: const EdgeInsets.only(
-            top: 14.0,
-            bottom: 14.0,
-            left: 10.0,
-          ),
-          child: Row(
-            textBaseline: TextBaseline.alphabetic,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            children: <Widget>[
-              Icon(
-                widget.blob.type == TreeItemType.blob
-                    ? TorgGitlabIcons.file
-                    : TorgGitlabIcons.folder,
-                size: 16.0,
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 5.0),
-                child: Text(
-                  widget.blob.name,
-                  style: TextStyle(fontSize: 14.0),
-                ),
-              )
-            ],
-          ),
-          decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: _needsHighlight ? Color(0xffb8d6f4) : ui.Colors.linkWater,
-                  width: 0.0,
-                ),
-                bottom: BorderSide(
-                  color: _needsHighlight ? Color(0xffb8d6f4) : ui.Colors.linkWater,
-                  width: 0.0,
-                ),
-              ),
-              color: _needsHighlight ? Color(0xfff6fafe) : ui.Colors.white),
-        ),
-        onTap: widget.onTap,
-        onTapDown: _onTapDown,
-        onTapUp: _onTapUp,
-        onTapCancel: _onTapCancel,
       ),
     );
   }
