@@ -1,5 +1,5 @@
-name: torg_gitlab_uikit
-description: ui kit for torg gitlab app.
+name: uikit
+description: ui kit for gitlab app.
 version: 1.0.0+1
 
 environment:

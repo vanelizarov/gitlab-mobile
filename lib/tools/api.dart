@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:torg_gitlab/tools/storage.dart';
+import 'package:gitlab_mobile/tools/storage.dart';
 
-import 'package:torg_gitlab/models/project.dart';
-import 'package:torg_gitlab/models/user.dart';
-import 'package:torg_gitlab/models/error.dart';
-import 'package:torg_gitlab/models/branch.dart';
-import 'package:torg_gitlab/models/blob.dart';
-import 'package:torg_gitlab/models/file.dart';
+import 'package:gitlab_mobile/models/project.dart';
+import 'package:gitlab_mobile/models/user.dart';
+import 'package:gitlab_mobile/models/error.dart';
+import 'package:gitlab_mobile/models/branch.dart';
+import 'package:gitlab_mobile/models/blob.dart';
+import 'package:gitlab_mobile/models/file.dart';
 
 const String kBaseUrl = 'http://torgteam.cf/api/v4';
 

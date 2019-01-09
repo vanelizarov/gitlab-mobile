@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+import 'package:uikit/uikit.dart' as ui;
 
 class Fab extends StatelessWidget {
   final IconData icon;

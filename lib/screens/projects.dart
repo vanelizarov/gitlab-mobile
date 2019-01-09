@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+import 'package:uikit/uikit.dart' as ui;
 
-import 'package:torg_gitlab/tools/api.dart';
-import 'package:torg_gitlab/models/project.dart';
+import 'package:gitlab_mobile/tools/api.dart';
+import 'package:gitlab_mobile/models/project.dart';
 
-import 'package:torg_gitlab/screens/project.dart';
+import 'package:gitlab_mobile/screens/project.dart';
 
 class ProjectsPage extends StatelessWidget {
   final Api _api = Api();
@@ -70,7 +70,7 @@ class ProjectsPage extends StatelessWidget {
 
     return CupertinoPageScaffold(
       backgroundColor: ui.Colors.whiteSmoke,
-      child: FutureBuilder(
+      child: FutureBuilder<List<Project>>(
         future: _api.getProjects(),
         builder: (_, AsyncSnapshot<List<Project>> snapshot) {
           Widget projectsList;

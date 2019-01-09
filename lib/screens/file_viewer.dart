@@ -1,18 +1,18 @@
 import 'package:flutter/cupertino.dart';
 
-import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+import 'package:uikit/uikit.dart' as ui;
 
-import 'package:torg_gitlab/blocs/file_viewer_bloc.dart';
+import 'package:gitlab_mobile/blocs/file_viewer_bloc.dart';
 
-import 'package:torg_gitlab/tools/api.dart';
-import 'package:torg_gitlab/tools/bloc_provider.dart';
-import 'package:torg_gitlab/tools/keywords.dart';
-import 'package:torg_gitlab/tools/icons.dart';
+import 'package:gitlab_mobile/tools/api.dart';
+import 'package:gitlab_mobile/tools/bloc_provider.dart';
+import 'package:gitlab_mobile/tools/keywords.dart';
+import 'package:gitlab_mobile/tools/icons.dart';
 
-import 'package:torg_gitlab/models/file.dart';
+import 'package:gitlab_mobile/models/file.dart';
 
-import 'package:torg_gitlab/views/bidirectional_scroll_view.dart';
-import 'package:torg_gitlab/views/fab.dart';
+import 'package:gitlab_mobile/views/bidirectional_scroll_view.dart';
+import 'package:gitlab_mobile/views/fab.dart';
 
 enum _IndentSize { twoSpaces, fourSpaces }
 enum _IndentType { spaces, tabs }
@@ -200,7 +200,7 @@ class FileViewer extends StatelessWidget {
           ),
         ),
       ),
-      child: FutureBuilder(
+      child: FutureBuilder<File>(
         future: _api.getFile(
           branch: branch,
           filePath: filePath,

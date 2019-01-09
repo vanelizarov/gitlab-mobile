@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:torg_gitlab/tools/bloc_provider.dart';
+import 'package:gitlab_mobile/tools/bloc_provider.dart';
 
 class FileViewerBloc extends BlocBase {
   StreamController<bool> _isThemeDarkController = StreamController<bool>.broadcast();

@@ -1,19 +1,19 @@
 import 'package:flutter/cupertino.dart';
-import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+import 'package:uikit/uikit.dart' as ui;
 
-import 'package:torg_gitlab/tools/api.dart';
-import 'package:torg_gitlab/tools/icons.dart';
-import 'package:torg_gitlab/tools/bloc_provider.dart';
+import 'package:gitlab_mobile/tools/api.dart';
+import 'package:gitlab_mobile/tools/icons.dart';
+import 'package:gitlab_mobile/tools/bloc_provider.dart';
 
-import 'package:torg_gitlab/blocs/repository_bloc.dart';
-import 'package:torg_gitlab/blocs/file_viewer_bloc.dart';
+import 'package:gitlab_mobile/blocs/repository_bloc.dart';
+import 'package:gitlab_mobile/blocs/file_viewer_bloc.dart';
 
-import 'package:torg_gitlab/models/project.dart';
-import 'package:torg_gitlab/models/blob.dart';
-import 'package:torg_gitlab/models/branch.dart';
+import 'package:gitlab_mobile/models/project.dart';
+import 'package:gitlab_mobile/models/blob.dart';
+import 'package:gitlab_mobile/models/branch.dart';
 
-import 'package:torg_gitlab/views/blob_row.dart';
-import 'package:torg_gitlab/views/breadcrumbs.dart';
+import 'package:gitlab_mobile/views/blob_row.dart';
+import 'package:gitlab_mobile/views/breadcrumbs.dart';
 
 import 'file_viewer.dart';
 
@@ -70,7 +70,7 @@ class RepositoryView extends StatelessWidget {
             Container(
               height: ui.kPickerSheetHeight,
               color: ui.Colors.whiteSmoke,
-              child: FutureBuilder(
+              child: FutureBuilder<List<Branch>>(
                 future: _api.getBranchesForProject(projectId: _project.id),
                 builder: (_, AsyncSnapshot<List<Branch>> snapshot) {
                   if (snapshot.hasData) {

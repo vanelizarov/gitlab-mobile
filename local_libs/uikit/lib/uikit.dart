@@ -1,4 +1,4 @@
-library torg_gitlab_uikit;
+library uikit;
 
 export 'src/colors.dart';
 export 'src/button.dart';

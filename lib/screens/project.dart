@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
-import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+import 'package:uikit/uikit.dart' as ui;
 
-import 'package:torg_gitlab/tools/icons.dart';
-import 'package:torg_gitlab/tools/api.dart';
-import 'package:torg_gitlab/tools/bloc_provider.dart';
+import 'package:gitlab_mobile/tools/icons.dart';
+import 'package:gitlab_mobile/tools/api.dart';
+import 'package:gitlab_mobile/tools/bloc_provider.dart';
 
-import 'package:torg_gitlab/models/project.dart';
-import 'package:torg_gitlab/models/blob.dart';
+import 'package:gitlab_mobile/models/project.dart';
+import 'package:gitlab_mobile/models/blob.dart';
 
-import 'package:torg_gitlab/blocs/repository_bloc.dart';
+import 'package:gitlab_mobile/blocs/repository_bloc.dart';
 
 import 'repository.dart';
 
@@ -75,7 +75,7 @@ class ProjectPage extends StatelessWidget {
           if (index == 0) {
             return BlocProvider<RepositoryBloc>(
               bloc: RepositoryBloc(),
-              child: FutureBuilder(
+              child: FutureBuilder<List<Blob>>(
                 future: _api.getRepositoryTree(
                   projectId: _project.id,
                   branch: _project.defaultBranch,

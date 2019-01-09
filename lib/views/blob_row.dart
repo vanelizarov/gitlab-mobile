@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:torg_gitlab_uikit/torg_gitlab_uikit.dart' as ui;
+import 'package:uikit/uikit.dart' as ui;
 
-import 'package:torg_gitlab/tools/icons.dart';
+import 'package:gitlab_mobile/tools/icons.dart';
 
-import 'package:torg_gitlab/models/blob.dart';
+import 'package:gitlab_mobile/models/blob.dart';
 
 class BlobRow extends StatefulWidget {
   final Blob blob;
